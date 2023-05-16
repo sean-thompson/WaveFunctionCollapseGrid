@@ -7,10 +7,12 @@ $(document).ready(function() {
   
     // Predefined list of images to switch between
     var imageList = [
-      "https://via.placeholder.com/50/808080?text=Image+1", // Grey
-      "https://via.placeholder.com/50/ff0000?text=Image+2", // Red
-      "https://via.placeholder.com/50/00ff00?text=Image+3", // Green
-      "https://via.placeholder.com/50/0000ff?text=Image+4" // Blue
+      "https://via.placeholder.com/50/808080?text=Soil", // Grey
+      "https://via.placeholder.com/50/8f0032?text=Poppies", // Red
+      "https://via.placeholder.com/50/fb3b24?text=Cosmos", // Orange
+      "https://via.placeholder.com/50/ffe243?text=Begonia", // Yellow
+      "https://via.placeholder.com/50/fff0be?text=Allium", // Beige
+      "https://via.placeholder.com/50/98bc65?text=Plant" // Green
     ];
   
     // Create the table element
@@ -23,15 +25,21 @@ $(document).ready(function() {
       // Add cells with images
       for (var j = 0; j < numCells; j++) {
         var cell = $("<td>");
-        var imageIndex = 0; // First image in imageList is grey
+        var imageIndex = 0; // First image in imageList is soil
         var imageSrc = imageList[imageIndex];
         var image = $("<img>").attr("src", imageSrc);
   
         // Click event to swap the image
         image.on("click", function() {
           var currentIndex = imageList.indexOf($(this).attr("src"));
-          var nextIndex = (currentIndex + 1) % imageList.length;
+          var nextIndex = currentIndex % (imageList.length-1) + 1;
           $(this).attr("src", imageList[nextIndex]);
+        });
+
+        image.on('contextmenu', function(event) {
+          event.preventDefault(); // Prevent the default context menu behavior
+      
+          $(this).attr("src", imageList[0]);
         });
   
         cell.append(image);
@@ -43,9 +51,9 @@ $(document).ready(function() {
   
     // Append the table to the body
     $("body").append(table);
-  
-    // Add the "Sample" button after the table
-    var sampleButton = $("<button>").text("Sample").on("click", function() {
+
+    // Add the grow button and grow functionality
+    var growButton = $("<button>").text("Grow").on("click", function() {
       sampleArray = []; // Reset the sample array
   
       // Loop through the cells in the table to sample
@@ -67,11 +75,6 @@ $(document).ready(function() {
           }
         }
       }
-    });
-  
-    $("body").append(sampleButton);
-
-    var growButton = $("<button>").text("Grow").on("click", function() {
         
         const nextGeneration = [];
 
