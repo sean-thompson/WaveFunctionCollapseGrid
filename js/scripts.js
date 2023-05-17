@@ -29,13 +29,14 @@ $(document).ready(function() {
         var imageSrc = imageList[imageIndex];
         var image = $("<img>").attr("src", imageSrc);
   
-        // Click event to swap the image
+        // Click event to swap the plant
         image.on("click", function() {
           var currentIndex = imageList.indexOf($(this).attr("src"));
           var nextIndex = currentIndex % (imageList.length-1) + 1;
           $(this).attr("src", imageList[nextIndex]);
         });
 
+        // Click event to return to soil
         image.on('contextmenu', function(event) {
           event.preventDefault(); // Prevent the default context menu behavior
       
@@ -75,7 +76,48 @@ $(document).ready(function() {
           }
         }
       }
+
+      // mirror the samples
+      var n = sampleArray.length - 1;
+      while (n >= 0) {
+        let value = [...sampleArray[n]];
         
+        for (var i = 0; i < sampleSize; i++) {
+          for (var j = 0; j < Math.floor(sampleSize/2); j++) {
+            [value[sampleSize*i+j], value[sampleSize*i-j+sampleSize-1]] = [value[sampleSize*i-j+sampleSize-1], value[sampleSize*i+j]];
+          }
+        }
+
+        sampleArray.push(value);
+        n--;
+      }
+
+      // rotate the samples
+      n = sampleArray.length - 1;
+      while (n >= 0) {
+
+        let before = [...sampleArray[n]];
+
+        for (var m = 0; m<3; m++) {
+          let after = []
+          
+          for (var i = 0; i < sampleSize; i++) {
+            for (var j = 0; j < sampleSize; j++) {
+              after.push(before[sampleSize**2 + i -sampleSize*j - sampleSize])
+            }
+          }
+
+          sampleArray.push(after);
+          before = [...after];
+        }
+
+        n--;
+      }
+
+      // remove duuplicates
+
+        
+      // find all the possible matches for the next generation
         const nextGeneration = [];
 
         for (var i = 0; i <= numRows - sampleSize; i++) {
@@ -129,4 +171,3 @@ $(document).ready(function() {
 
     $("body").append(growButton);
   });
-  
