@@ -4,7 +4,7 @@ $(document).ready(function() {
     var numCells = 20; // Number of cells per row
     var sampleSize = 3; // Size of the sample grid
     var sampleArray = []; // Array to store the changed samples
-  
+
     // Predefined list of images to switch between
     var imageList = [
       "https://via.placeholder.com/50/808080?text=Soil", // Grey
@@ -115,7 +115,30 @@ $(document).ready(function() {
       }
 
       // remove duuplicates
+      const countMap = {};
+      const uniqueSamples = [];
 
+      // Count duplicates using an object as a dictionary
+      for (const subArray of sampleArray) {
+        const key = JSON.stringify(subArray);
+        countMap[key] = (countMap[key] || 0) + 1;
+      }
+
+      // Copy unique sub-arrays to the new array
+      for (const subArray of sampleArray) {
+        const key = JSON.stringify(subArray);
+        if (!uniqueSamples.some((arr) => JSON.stringify(arr) === key)) {
+          uniqueSamples.push(subArray);
+        }
+      }
+
+      // Return the new array with count information
+      let weightedSamples = uniqueSamples.map((subArray) => ({
+        value: subArray,
+        count: countMap[JSON.stringify(subArray)]
+      }));
+
+      //console.log(weightedSamples)
         
       // find all the possible matches for the next generation
         const nextGeneration = [];
@@ -135,32 +158,37 @@ $(document).ready(function() {
               // Look for samples which have a mix of set images and default images
               const count = sampleImages.filter(element => element === imageList[0]).length;
               if(count > 0 && count < sampleSize ** 2) {
-                for (const test of sampleArray) {
+                for (const test of weightedSamples) {
 
                     // record smples which can be replaced
-                    if(sampleImages.every((value, index) => value == test[index] || value == imageList[0])) {
-                        nextGeneration.push([i, j, test]) // This is the format of nextGeneration - X, Y, new values
+                    if(sampleImages.every((value, index) => value == test.value[index] || value == imageList[0])) {
+                        nextGeneration.push({"x":i, "y":j, "count":test.count, "value":test.value}) // This is the format of nextGeneration - X, Y, new values
 
-                        break; //TODO - don't break. record all options and use the one with least entropy
+                        //break; //TODO - don't break. record all options and use the one with least entropy
                     }
                 }
               } 
             }
         }
 
-        //randomise the order of taks
-        for (let i = nextGeneration.length - 1; i > 0; i--) {
+        //randomise the order of tasks
+        /*for (let i = nextGeneration.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [nextGeneration[i], nextGeneration[j]] = [nextGeneration[j], nextGeneration[i]];
-        }
+        }*/
+
+        //TODO - order the tasks by entropy
+        nextGeneration.sort((a, b) => a.count - b.count)
+        //console.log(nextGeneration)
+
 
         // Update the table
         nextGeneration.forEach((value) => {
             var index = 0;
-            for (var x = value[0]; x < value[0] + sampleSize; x++) {
-                for (var y = value[1]; y < value[1] + sampleSize; y++) {
+            for (var x = value.x; x < value.x + sampleSize; x++) {
+                for (var y = value.y; y < value.y + sampleSize; y++) {
                     var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
-                    cellImage.attr("src", value[2][index]);
+                    cellImage.attr("src", value.value[index]);
                     index++;
                 }
             }
