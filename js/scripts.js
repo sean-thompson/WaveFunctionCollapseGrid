@@ -14,204 +14,209 @@
     "https://via.placeholder.com/50/98bc65?text=Plant" // Green
   ];
 
-$(document).ready(function() {
-    // Create the table element
-    var table = $("<table>").addClass("my-table");
+function createTable(){
+  // Create the table element
+  var table = $("<table>").addClass("my-table");
   
-    // Create the table rows with data
-    for (var i = 0; i < numRows; i++) {
-      var row = $("<tr>");
-  
-      // Add cells with images
-      for (var j = 0; j < numCells; j++) {
-        var cell = $("<td>");
-        var imageIndex = 0; // First image in imageList is soil
-        var imageSrc = imageList[imageIndex];
-        var image = $("<img>").attr("src", imageSrc);
-  
-        // Click event to swap the plant
-        image.on("click", function() {
-          var currentIndex = imageList.indexOf($(this).attr("src"));
-          var nextIndex = currentIndex % (imageList.length-1) + 1;
-          $(this).attr("src", imageList[nextIndex]);
-        });
+  // Create the table rows with data
+  for (var i = 0; i < numRows; i++) {
+    var row = $("<tr>");
 
-        // Click event to return to soil
-        image.on('contextmenu', function(event) {
-          event.preventDefault(); // Prevent the default context menu behavior
-      
-          $(this).attr("src", imageList[0]);
-        });
-  
-        cell.append(image);
-        row.append(cell);
-      }
-  
-      table.append(row);
+    // Add cells with images
+    for (var j = 0; j < numCells; j++) {
+      var cell = $("<td>");
+      var imageIndex = 0; // First image in imageList is soil
+      var imageSrc = imageList[imageIndex];
+      var image = $("<img>").attr("src", imageSrc);
+
+      // Click event to swap the plant
+      image.on("click", function() {
+        var currentIndex = imageList.indexOf($(this).attr("src"));
+        var nextIndex = currentIndex % (imageList.length-1) + 1;
+        $(this).attr("src", imageList[nextIndex]);
+      });
+
+      // Click event to return to soil
+      image.on('contextmenu', function(event) {
+        event.preventDefault(); // Prevent the default context menu behavior
+    
+        $(this).attr("src", imageList[0]);
+      });
+
+      cell.append(image);
+      row.append(cell);
     }
-  
-    // Append the table to the body
-    $("body").append(table);
 
-    // Add the grow button and grow functionality
-    var growButton = $("<button>").text("Grow").on("click", function() {
-      sampleArray = []; // Reset the sample array
+    table.append(row);
+  }
+
+  // Append the table to the body
+  $("body").append(table);
+
+  return table;
+}
+
+function findSamples(table){
+  sampleArray = []; // Reset the sample array
   
-      // Loop through the cells in the table to sample
-      for (var i = 0; i <= numRows - sampleSize; i++) {
-        for (var j = 0; j <= numCells - sampleSize; j++) {
-          var sampleImages = [];
-  
-          // Collect the URLs of the images in the sample
-          for (var x = i; x < i + sampleSize; x++) {
-            for (var y = j; y < j + sampleSize; y++) {
-              var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
-              sampleImages.push(cellImage.attr("src"));
-            }
-          }
-  
-          // Add the sample to the array if it does not contain the first image
-          if (!sampleImages.includes(imageList[0])) {
-            sampleArray.push(sampleImages);
-          }
+  // Loop through the cells in the table to sample
+  for (var i = 0; i <= numRows - sampleSize; i++) {
+    for (var j = 0; j <= numCells - sampleSize; j++) {
+      var sampleImages = [];
+
+      // Collect the URLs of the images in the sample
+      for (var x = i; x < i + sampleSize; x++) {
+        for (var y = j; y < j + sampleSize; y++) {
+          var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
+          sampleImages.push(cellImage.attr("src"));
         }
       }
 
-      // mirror the samples
-      var n = sampleArray.length - 1;
-      while (n >= 0) {
-        let value = [...sampleArray[n]];
-        
-        for (var i = 0; i < sampleSize; i++) {
-          for (var j = 0; j < Math.floor(sampleSize/2); j++) {
-            [value[sampleSize*i+j], value[sampleSize*i-j+sampleSize-1]] = [value[sampleSize*i-j+sampleSize-1], value[sampleSize*i+j]];
-          }
-        }
-
-        sampleArray.push(value);
-        n--;
+      // Add the sample to the array if it does not contain the first image
+      if (!sampleImages.includes(imageList[0])) {
+        sampleArray.push(sampleImages);
       }
+    }
+  }
 
-      // rotate the samples
-      n = sampleArray.length - 1;
-      while (n >= 0) {
-
-        let before = [...sampleArray[n]];
-
-        for (var m = 0; m<3; m++) {
-          let after = []
-          
-          for (var i = 0; i < sampleSize; i++) {
-            for (var j = 0; j < sampleSize; j++) {
-              after.push(before[sampleSize**2 + i -sampleSize*j - sampleSize])
-            }
-          }
-
-          sampleArray.push(after);
-          before = [...after];
-        }
-
-        n--;
+  // mirror the samples
+  var n = sampleArray.length - 1;
+  while (n >= 0) {
+    let value = [...sampleArray[n]];
+    
+    for (var i = 0; i < sampleSize; i++) {
+      for (var j = 0; j < Math.floor(sampleSize/2); j++) {
+        [value[sampleSize*i+j], value[sampleSize*i-j+sampleSize-1]] = [value[sampleSize*i-j+sampleSize-1], value[sampleSize*i+j]];
       }
+    }
 
-      // remove duuplicates
-      const countMap = {};
-      const uniqueSamples = [];
+    sampleArray.push(value);
+    n--;
+  }
 
-      // Count duplicates using an object as a dictionary
-      for (const subArray of sampleArray) {
-        const key = JSON.stringify(subArray);
-        countMap[key] = (countMap[key] || 0) + 1;
-      }
+  // rotate the samples
+  n = sampleArray.length - 1;
+  while (n >= 0) {
 
-      // Copy unique sub-arrays to the new array
-      for (const subArray of sampleArray) {
-        const key = JSON.stringify(subArray);
-        if (!uniqueSamples.some((arr) => JSON.stringify(arr) === key)) {
-          uniqueSamples.push(subArray);
-        }
-      }
+    let before = [...sampleArray[n]];
 
-      // Return the new array with count information
-      let weightedSamples = uniqueSamples.map((subArray) => ({
-        value: subArray,
-        count: countMap[JSON.stringify(subArray)]
-      }));
-
-      //console.log(weightedSamples)
-        
-      // find all the possible matches for the next generation
-        const nextGeneration = [];
-
-        for (var i = 0; i <= numRows - sampleSize; i++) {
-            for (var j = 0; j <= numCells - sampleSize; j++) {
-              var sampleImages = [];
+    for (var m = 0; m<3; m++) {
+      let after = []
       
-              // Collect the URLs of the images in the sample
-              for (var x = i; x < i + sampleSize; x++) {
-                for (var y = j; y < j + sampleSize; y++) {
-                  var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
-                  sampleImages.push(cellImage.attr("src"));
-                }
-              }
+      for (var i = 0; i < sampleSize; i++) {
+        for (var j = 0; j < sampleSize; j++) {
+          after.push(before[sampleSize**2 + i -sampleSize*j - sampleSize])
+        }
+      }
 
-              // Look for samples which have a mix of set images and default images
-              const count = sampleImages.filter(element => element === imageList[0]).length;
-              if(count > 0 && count < sampleSize ** 2) {
-                for (const test of weightedSamples) {
+      sampleArray.push(after);
+      before = [...after];
+    }
 
-                    // record smples which can be replaced
-                    if(sampleImages.every((value, index) => value == test.value[index] || value == imageList[0])) {
-                      const plantCount = sampleSize ** 2 - sampleImages.filter(item => item == imageList[0]).length;
+    n--;
+  }
 
-                      nextGeneration.push({"x":i, "y":j, "weight":test.count*plantCount, "value":test.value}) // This is the format of nextGeneration - X, Y, new values
+  // remove duuplicates
+  const countMap = {};
+  const uniqueSamples = [];
 
-                        //TODO multiply count by the number of colour (ie, not imageList[0]) squares, so adding fewer new flowers is preferred
-                    }
-                }
-              } 
+  // Count duplicates using an object as a dictionary
+  for (const subArray of sampleArray) {
+    const key = JSON.stringify(subArray);
+    countMap[key] = (countMap[key] || 0) + 1;
+  }
+
+  // Copy unique sub-arrays to the new array
+  for (const subArray of sampleArray) {
+    const key = JSON.stringify(subArray);
+    if (!uniqueSamples.some((arr) => JSON.stringify(arr) === key)) {
+      uniqueSamples.push(subArray);
+    }
+  }
+
+  // Return the new array with count information
+  let weightedSamples = uniqueSamples.map((subArray) => ({
+    value: subArray,
+    count: countMap[JSON.stringify(subArray)]
+  }));
+
+  return weightedSamples;
+}
+
+function createNextGeneration(table, weightedSamples){
+  // find all the possible matches for the next generation
+  const nextGeneration = [];
+
+  for (var i = 0; i <= numRows - sampleSize; i++) {
+    for (var j = 0; j <= numCells - sampleSize; j++) {
+      var sampleImages = [];
+
+      // Collect the URLs of the images in the sample
+      for (var x = i; x < i + sampleSize; x++) {
+        for (var y = j; y < j + sampleSize; y++) {
+          var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
+          sampleImages.push(cellImage.attr("src"));
+        }
+      }
+
+      // Look for samples which have a mix of set images and default images
+      const count = sampleImages.filter(element => element === imageList[0]).length;
+      if(count > 0 && count < sampleSize ** 2) {
+        for (const test of weightedSamples) {
+
+            // record smples which can be replaced
+            if(sampleImages.every((value, index) => value == test.value[index] || value == imageList[0])) {
+              const plantCount = sampleSize ** 2 - sampleImages.filter(item => item == imageList[0]).length;
+
+              nextGeneration.push({"x":i, "y":j, "weight":test.count*plantCount, "value":test.value}) // This is the format of nextGeneration - X, Y, new values
+
+                //TODO multiply count by the number of colour (ie, not imageList[0]) squares, so adding fewer new flowers is preferred
             }
         }
+      } 
+    }
+  }
 
-        //orders by lowest entropy first
-        nextGeneration.sort((a, b) => b.weight - a.weight);
-        console.log(nextGeneration);
+      //orders by lowest entropy first
+      nextGeneration.sort((a, b) => b.weight - a.weight);
+      console.log(nextGeneration);
 
-        //selects one random tile near the start of the pack, more likely to land on lower entropy (higher weight) items
-        const target = Math.ceil(Math.random()*500);
-        let countdown = target;
+      return nextGeneration;
+}
 
-        for (const value of nextGeneration){
-          countdown -= value.weight;
+function growNextGeneration(table, nextGeneration, chaos){
+  const totalWeight = nextGeneration.reduce((accumulator, obj) => accumulator + obj.weight, 0);
+  console.log(totalWeight)
 
-          let index = 0;
-          if (countdown <= 0){
-            for (var x = value.x; x < value.x + sampleSize; x++) {
-              for (var y = value.y; y < value.y + sampleSize; y++) {
-                  var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
-                  cellImage.attr("src", value.value[index]);
-                  index++;
-              }
-            }
-            break;
-          }
+  //selects one random tile near the start of the pack, more likely to land on lower entropy (higher weight) items
+  const target = Math.ceil(totalWeight * chaos);
+  let countdown = target;
+
+  for (const value of nextGeneration){
+    countdown -= value.weight;
+
+    let index = 0;
+    if (countdown <= 0){
+      for (var x = value.x; x < value.x + sampleSize; x++) {
+        for (var y = value.y; y < value.y + sampleSize; y++) {
+            var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
+            cellImage.attr("src", value.value[index]);
+            index++;
         }
+      }
+      break;
+    }
+  }
+}
 
-        // Update the table
-        /*  for (var n=0; n < 10; n++){
-            var value = nextGeneration[n];
-            var index = 0;
-            for (var x = value.x; x < value.x + sampleSize; x++) {
-                for (var y = value.y; y < value.y + sampleSize; y++) {
-                    var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
-                    cellImage.attr("src", value.value[index]);
-                    index++;
-                }
-            }
-        };*/
-    });
+$(document).ready(function() {
+  const table = createTable();
 
-
-
-    $("body").append(growButton);
+  // Add the grow button and grow functionality
+  var growButton = $("<button>").text("Grow").on("click", function() {
+    const weightedSamples = findSamples(table);
+    const nextGeneration = createNextGeneration(table, weightedSamples);
+    growNextGeneration(table, nextGeneration, 0.5);
   });
+  $("body").append(growButton);
+});
