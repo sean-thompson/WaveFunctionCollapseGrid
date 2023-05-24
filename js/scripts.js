@@ -179,32 +179,36 @@ function createNextGeneration(table, weightedSamples){
 
       //orders by lowest entropy first
       nextGeneration.sort((a, b) => b.weight - a.weight);
-      console.log(nextGeneration);
 
       return nextGeneration;
 }
 
-function growNextGeneration(table, nextGeneration, chaos){
+function growNextGeneration(table, nextGeneration, chaos, isRandom, isGreedy){
   const totalWeight = nextGeneration.reduce((accumulator, obj) => accumulator + obj.weight, 0);
-  console.log(totalWeight)
 
   //selects one random tile near the start of the pack, more likely to land on lower entropy (higher weight) items
-  const target = Math.ceil(totalWeight * chaos);
+  const target = Math.ceil(totalWeight * chaos * (isRandom ? Math.random() : 1));
   let countdown = target;
 
   for (const value of nextGeneration){
     countdown -= value.weight;
 
     let index = 0;
-    if (countdown <= 0){
+    if ((isGreedy && countdown > 0) || (!isGreedy && countdown <= 0)){
       for (var x = value.x; x < value.x + sampleSize; x++) {
         for (var y = value.y; y < value.y + sampleSize; y++) {
             var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
-            cellImage.attr("src", value.value[index]);
+
+            if(cellImage.attr("src") == imageList[0]){
+              cellImage.attr("src", value.value[index]);
+            }
             index++;
         }
       }
-      break;
+
+      if(!isGreedy){
+        break;
+      }
     }
   }
 }
@@ -212,11 +216,27 @@ function growNextGeneration(table, nextGeneration, chaos){
 $(document).ready(function() {
   const table = createTable();
 
-  // Add the grow button and grow functionality
-  var growButton = $("<button>").text("Grow").on("click", function() {
+  // grow a few plants, nice ones
+  var growOneButton = $("<button>").text("Grow One").on("click", function() {
     const weightedSamples = findSamples(table);
     const nextGeneration = createNextGeneration(table, weightedSamples);
-    growNextGeneration(table, nextGeneration, 0.5);
+    growNextGeneration(table, nextGeneration, 0.5, true, false);
   });
-  $("body").append(growButton);
+  $("body").append(growOneButton);
+
+  // entire next generation //TODO - make sure it's prioritising the best samples
+  var growManyButton = $("<button>").text("Grow Many").on("click", function() {
+    const weightedSamples = findSamples(table);
+    const nextGeneration = createNextGeneration(table, weightedSamples);
+    growNextGeneration(table, nextGeneration, 1, false, true);
+  });
+  $("body").append(growManyButton);
+
+  // grow a few plants from the best sample
+  var growBestButton = $("<button>").text("Grow Best").on("click", function() {
+    const weightedSamples = findSamples(table);
+    const nextGeneration = createNextGeneration(table, weightedSamples);
+    growNextGeneration(table, nextGeneration, 0, false, false);
+  });
+  $("body").append(growBestButton);
 });
