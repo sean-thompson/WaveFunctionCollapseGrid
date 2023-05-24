@@ -1,20 +1,20 @@
-$(document).ready(function() {
-    // Define the number of rows and cells
-    var numRows = 20; // Number of rows
-    var numCells = 20; // Number of cells per row
-    var sampleSize = 3; // Size of the sample grid
-    var sampleArray = []; // Array to store the changed samples
+  // Define the number of rows and cells
+  var numRows = 20; // Number of rows
+  var numCells = 20; // Number of cells per row
+  var sampleSize = 3; // Size of the sample grid
+  var sampleArray = []; // Array to store the changed samples
 
-    // Predefined list of images to switch between
-    var imageList = [
-      "https://via.placeholder.com/50/808080?text=Soil", // Grey
-      "https://via.placeholder.com/50/8f0032?text=Poppies", // Red
-      "https://via.placeholder.com/50/fb3b24?text=Cosmos", // Orange
-      "https://via.placeholder.com/50/ffe243?text=Begonia", // Yellow
-      "https://via.placeholder.com/50/fff0be?text=Allium", // Beige
-      "https://via.placeholder.com/50/98bc65?text=Plant" // Green
-    ];
-  
+  // Predefined list of images to switch between
+  var imageList = [
+    "https://via.placeholder.com/50/808080?text=Soil", // Grey
+    "https://via.placeholder.com/50/8f0032?text=Poppies", // Red
+    "https://via.placeholder.com/50/fb3b24?text=Cosmos", // Orange
+    "https://via.placeholder.com/50/ffe243?text=Begonia", // Yellow
+    "https://via.placeholder.com/50/fff0be?text=Allium", // Beige
+    "https://via.placeholder.com/50/98bc65?text=Plant" // Green
+  ];
+
+$(document).ready(function() {
     // Create the table element
     var table = $("<table>").addClass("my-table");
   
@@ -162,28 +162,44 @@ $(document).ready(function() {
 
                     // record smples which can be replaced
                     if(sampleImages.every((value, index) => value == test.value[index] || value == imageList[0])) {
-                        nextGeneration.push({"x":i, "y":j, "count":test.count, "value":test.value}) // This is the format of nextGeneration - X, Y, new values
+                      const plantCount = sampleSize ** 2 - sampleImages.filter(item => item == imageList[0]).length;
 
-                        //break; //TODO - don't break. record all options and use the one with least entropy
+                      nextGeneration.push({"x":i, "y":j, "weight":test.count*plantCount, "value":test.value}) // This is the format of nextGeneration - X, Y, new values
+
+                        //TODO multiply count by the number of colour (ie, not imageList[0]) squares, so adding fewer new flowers is preferred
                     }
                 }
               } 
             }
         }
 
-        //randomise the order of tasks
-        /*for (let i = nextGeneration.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [nextGeneration[i], nextGeneration[j]] = [nextGeneration[j], nextGeneration[i]];
-        }*/
+        //orders by lowest entropy first
+        nextGeneration.sort((a, b) => b.weight - a.weight);
+        console.log(nextGeneration);
 
-        //TODO - order the tasks by entropy
-        nextGeneration.sort((a, b) => a.count - b.count)
-        //console.log(nextGeneration)
+        //selects one random tile near the start of the pack, more likely to land on lower entropy (higher weight) items
+        const target = Math.ceil(Math.random()*500);
+        let countdown = target;
 
+        for (const value of nextGeneration){
+          countdown -= value.weight;
+
+          let index = 0;
+          if (countdown <= 0){
+            for (var x = value.x; x < value.x + sampleSize; x++) {
+              for (var y = value.y; y < value.y + sampleSize; y++) {
+                  var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
+                  cellImage.attr("src", value.value[index]);
+                  index++;
+              }
+            }
+            break;
+          }
+        }
 
         // Update the table
-        nextGeneration.forEach((value) => {
+        /*  for (var n=0; n < 10; n++){
+            var value = nextGeneration[n];
             var index = 0;
             for (var x = value.x; x < value.x + sampleSize; x++) {
                 for (var y = value.y; y < value.y + sampleSize; y++) {
@@ -192,7 +208,7 @@ $(document).ready(function() {
                     index++;
                 }
             }
-        });
+        };*/
     });
 
 
