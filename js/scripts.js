@@ -1,18 +1,27 @@
   // Define the number of rows and cells
-  var numRows = 20; // Number of rows
-  var numCells = 20; // Number of cells per row
-  var sampleSize = 3; // Size of the sample grid
-  var sampleArray = []; // Array to store the changed samples
+  const numRows = 20; // Number of rows
+  const numCells = 20; // Number of cells per row
+  const sampleSize = 3; // Size of the sample grid
+  let sampleArray = []; // Array to store the changed samples
 
   // Predefined list of images to switch between
-  var imageList = [
-    "https://via.placeholder.com/50/808080?text=Soil", // Grey
-    "https://via.placeholder.com/50/8f0032?text=Poppies", // Red
-    "https://via.placeholder.com/50/fb3b24?text=Cosmos", // Orange
-    "https://via.placeholder.com/50/ffe243?text=Begonia", // Yellow
-    "https://via.placeholder.com/50/fff0be?text=Allium", // Beige
-    "https://via.placeholder.com/50/98bc65?text=Plant" // Green
+  const imageList = [
+    "./img/dirt.png",
+    "./img/bluebells.png",
+    "./img/bracken.png",
+    "./img/brambles.png",
+    "./img/cottongrass.png",
+    "./img/moss.png",
+    "./img/mushrooms.png",
+    "./img/wildgarlic.png"
   ];
+
+  //trees
+  const trees = {
+    "oak":[[0,7,1,7,0],[7,1,7,7,1],[7,7,5,7,7],[7,1,7,1,7],[0,7,1,7,0]],
+    "birch":[[0,2,2,2,0],[2,6,2,2,6],[2,2,6,2,2],[2,2,2,2,2],[0,2,2,6,0]],
+    "pine":[[0,3,4,4,0],[4,4,4,3,4],[3,4,3,4,3],[4,4,3,4,4],[0,4,4,3,0]]
+  }
 
 function createTable(){
   // Create the table element
@@ -28,6 +37,9 @@ function createTable(){
       var imageIndex = 0; // First image in imageList is soil
       var imageSrc = imageList[imageIndex];
       var image = $("<img>").attr("src", imageSrc);
+
+      image.width("50px");
+      image.height("50px");
 
       // Click event to swap the plant
       image.on("click", function() {
