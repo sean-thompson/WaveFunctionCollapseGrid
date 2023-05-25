@@ -18,9 +18,15 @@
 
   //trees
   const trees = {
-    "oak":[[0,7,1,7,0],[7,1,7,7,1],[7,7,5,7,7],[7,1,7,1,7],[0,7,1,7,0]],
-    "birch":[[0,2,2,2,0],[2,6,2,2,6],[2,2,6,2,2],[2,2,2,2,2],[0,2,2,6,0]],
-    "pine":[[0,3,4,4,0],[4,4,4,3,4],[3,4,3,4,3],[4,4,3,4,4],[0,4,4,3,0]]
+    "oak":
+      {"data":[[0,7,1,7,0],[7,1,7,7,1],[7,7,5,7,7],[7,1,7,1,7],[0,7,1,7,0]],
+        "ox":525, "oy":1300, "scale":0.3, "location":"./img/oak.png"},
+    "birch":
+      {"data":[[0,2,2,2,0],[2,6,2,2,6],[2,2,6,2,2],[2,2,2,2,2],[0,2,2,6,0]],
+      "ox":525, "oy":1300, "scale":0.3, "location":"./img/birch.png"},
+    "pine":
+      {"data":[[0,3,4,4,0],[4,4,4,3,4],[3,4,3,4,3],[4,4,3,4,4],[0,4,4,3,0]],
+      "ox":540, "oy":1300, "scale":0.3, "location":"./img/pine.png"}
   }
 
 function createTable(){
@@ -251,4 +257,61 @@ $(document).ready(function() {
     growNextGeneration(table, nextGeneration, 0, false, false);
   });
   $("body").append(growBestButton);
+
+  let mouseX, mouseY;
+
+  $(document).mousemove(function(event) {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+  });
+
+  $(document).keydown(function(event) {
+      const element = $(document.elementFromPoint(mouseX, mouseY));
+      console.log(element.closest("td").index(), element.closest("tr").index());
+
+      let image, dx, dy, scale;
+
+      if (event.key === "q") {
+        image = $('<img>', {
+          src: trees.oak.location
+        });
+        dx = -trees.oak.ox;
+        dy = -trees.oak.oy;
+        scale = trees.oak.scale;
+      } else if (event.key === "w") {
+        image = $('<img>', {
+          src: trees.birch.location
+        });
+        dx = -trees.birch.ox;
+        dy = -trees.birch.oy;
+        scale = trees.birch.scale;
+      } else if (event.key === "e") {
+        image = $('<img>', {
+          src: trees.pine.location
+        });
+        dx = -trees.pine.ox;
+        dy = -trees.pine.oy;
+        scale = trees.pine.scale;
+      } else {
+        return;
+      }
+
+      var devicePixelRatio = window.devicePixelRatio || 1;
+    
+      // Output the device pixel ratio to the console
+      console.log('Device Pixel Ratio:', devicePixelRatio);
+
+      console.log(image)
+
+      image.css({
+        position: 'absolute',
+        left: mouseX+scale*dx+'px',
+        top: mouseY+scale*dy+'px',
+        width: scale*100+'%',
+        height: scale*100+'%',
+        "z-index": mouseY+scale*dy+1000
+      });
+
+      $("body").append(image);
+  });
 });
