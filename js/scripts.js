@@ -85,7 +85,7 @@ function findSamples(table){
       // Collect the URLs of the images in the sample
       for (var x = i; x < i + sampleSize; x++) {
         for (var y = j; y < j + sampleSize; y++) {
-          var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
+          var cellImage = table.find("tr").eq(y).find("td").eq(x).find("img");
           sampleImages.push(cellImage.attr("src"));
         }
       }
@@ -266,10 +266,7 @@ $(document).ready(function() {
   });
 
   $(document).keydown(function(event) {
-      const element = $(document.elementFromPoint(mouseX, mouseY));
-      console.log(element.closest("td").index(), element.closest("tr").index());
-
-      let image, dx, dy, scale;
+      let image, dx, dy, scale, data;
 
       if (event.key === "q") {
         image = $('<img>', {
@@ -278,6 +275,7 @@ $(document).ready(function() {
         dx = -trees.oak.ox;
         dy = -trees.oak.oy;
         scale = trees.oak.scale;
+        data = trees.oak.data;
       } else if (event.key === "w") {
         image = $('<img>', {
           src: trees.birch.location
@@ -285,6 +283,7 @@ $(document).ready(function() {
         dx = -trees.birch.ox;
         dy = -trees.birch.oy;
         scale = trees.birch.scale;
+        data = trees.birch.data;
       } else if (event.key === "e") {
         image = $('<img>', {
           src: trees.pine.location
@@ -292,16 +291,12 @@ $(document).ready(function() {
         dx = -trees.pine.ox;
         dy = -trees.pine.oy;
         scale = trees.pine.scale;
+        data = trees.pine.data;
       } else {
         return;
       }
 
       var devicePixelRatio = window.devicePixelRatio || 1;
-    
-      // Output the device pixel ratio to the console
-      console.log('Device Pixel Ratio:', devicePixelRatio);
-
-      console.log(image)
 
       image.css({
         position: 'absolute',
@@ -309,9 +304,29 @@ $(document).ready(function() {
         top: mouseY+scale*dy+'px',
         width: scale*100+'%',
         height: scale*100+'%',
-        "z-index": mouseY+scale*dy+1000
+        "z-index": mouseY+scale*dy+1000,
+        "pointer-events": "none",
+        opacity: 0.9
       });
 
       $("body").append(image);
+
+
+      const element = $(document.elementFromPoint(mouseX, mouseY));
+      console.log(element.closest("td").index(), element.closest("tr").index());
+      const offsetX = element.closest("td").index();
+      const offsetY = element.closest("tr").index();
+
+
+
+      for (var x = 0; x < 5; x++) {
+        for (var y = 0; y < 5; y++) {
+          var cellImage = table.find("tr").eq(y+offsetY-2).find("td").eq(x+offsetX-2).find("img");
+
+            if(cellImage.attr("src") == imageList[0] && y+offsetY-2 >= 0 && x+offsetX-2 >= 0){
+              cellImage.attr("src", imageList[data[x][y]]);
+            }
+        }
+      }
   });
 });
