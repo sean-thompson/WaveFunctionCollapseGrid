@@ -1,6 +1,6 @@
   // Define the number of rows and cells
-  const numRows = 20; // Number of rows
-  const numCells = 20; // Number of cells per row
+  const numCells = 40; // Number of cells per row
+  const numRows = 30; // Number of rows
   const sampleSize = 3; // Size of the sample grid
   let sampleArray = []; // Array to store the changed samples
 
@@ -20,13 +20,13 @@
   const trees = {
     "oak":
       {"data":[[0,7,1,7,0],[7,1,7,7,1],[7,7,5,7,7],[7,1,7,1,7],[0,7,1,7,0]],
-        "ox":525, "oy":1300, "scale":0.3, "location":"./img/oak.png"},
+        "ox":26, "oy":55, "location":"./img/oaktree.png"},
     "birch":
       {"data":[[0,2,2,2,0],[2,6,2,2,6],[2,2,6,2,2],[2,2,2,2,2],[0,2,2,6,0]],
-      "ox":525, "oy":1300, "scale":0.3, "location":"./img/birch.png"},
+      "ox":20, "oy":45, "location":"./img/silverbirch.png"},
     "pine":
       {"data":[[0,3,4,4,0],[4,4,4,3,4],[3,4,3,4,3],[4,4,3,4,4],[0,4,4,3,0]],
-      "ox":540, "oy":1300, "scale":0.3, "location":"./img/pine.png"}
+      "ox":25, "oy":55, "location":"./img/pinetree.png"}
   }
 
 function createTable(){
@@ -44,8 +44,8 @@ function createTable(){
       var imageSrc = imageList[imageIndex];
       var image = $("<img>").attr("src", imageSrc);
 
-      image.width("50px");
-      image.height("50px");
+      image.width("32px");
+      image.height("32px");
 
       // Click event to swap the plant
       image.on("click", function() {
@@ -300,11 +300,9 @@ $(document).ready(function() {
 
       image.css({
         position: 'absolute',
-        left: mouseX+scale*dx+'px',
-        top: mouseY+scale*dy+'px',
-        width: scale*100+'%',
-        height: scale*100+'%',
-        "z-index": mouseY+scale*dy+1000,
+        left: mouseX+dx+'px',
+        top: mouseY+dy+'px',
+        "z-index": mouseY+dy+1000,
         "pointer-events": "none",
         opacity: 0.9
       });
