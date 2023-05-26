@@ -4,6 +4,10 @@
   const sampleSize = 3; // Size of the sample grid
   let sampleArray = []; // Array to store the changed samples
 
+  let element;//closest element to mouse
+  let offsetX;//closest parent td to mouse index
+  let offsetY;//closest parent tr to mouse index
+
   // Predefined list of images to switch between
   const imageList = [
     "./img/dirt.png",
@@ -236,8 +240,36 @@ function growNextGeneration(table, nextGeneration, chaos, isRandom, isGreedy){
 }
 
 $(document).ready(function() {
+
+  var progressBar = $('<div>').addClass('progress-bar');
+  
+  $('body').append(progressBar);
+  
+  function animateProgressBar() {
+    progressBar.css({
+      'width': '0px',
+      height: '8px',
+      'background-color': '#305d64'
+    }); // Reset progress bar width to 0%
+    
+    // Animate the progress bar width to 100% over the specified duration
+    progressBar.animate({
+      width: '1280px'
+    }, 8000, 'linear', function() {
+      // Animation complete callback
+      const weightedSamples = findSamples(table);
+      const nextGeneration = createNextGeneration(table, weightedSamples);
+      growNextGeneration(table, nextGeneration, 0.9, true, false);
+
+      animateProgressBar(); // Repeat the animation
+    });
+  }
+  
+  animateProgressBar(); // Start the initial animation
+
   const table = createTable();
 
+  /*
   // grow a few plants, nice ones
   var growOneButton = $("<button>").text("Grow One").on("click", function() {
     const weightedSamples = findSamples(table);
@@ -260,15 +292,34 @@ $(document).ready(function() {
     const nextGeneration = createNextGeneration(table, weightedSamples);
     growNextGeneration(table, nextGeneration, 0, false, false);
   });
-  $("body").append(growBestButton);
+  $("body").append(growBestButton);*/
 
+  //key presses
   let mouseX, mouseY;
 
   $(document).mousemove(function(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
+
+    element = $(document.elementFromPoint(mouseX, mouseY));
+    offsetX = element.closest("td").index();
+    offsetY = element.closest("tr").index();
   });
 
+  //plants
+  $(document).keydown(function(event) {
+    if (event.key >= 1 && event.key <= 7) {
+      var cellImage = table.find("tr").eq(offsetY).find("td").eq(offsetX).find("img");
+
+      if(offsetY >= 0 && offsetX >= 0){
+        cellImage.hide();
+        cellImage.attr("src", imageList[event.key]);
+        cellImage.fadeIn();
+      }
+    }
+  })
+
+  //trees
   $(document).keydown(function(event) {
       let image, dx, dy, scale, data;
 
@@ -300,8 +351,7 @@ $(document).ready(function() {
         return;
       }
 
-      var devicePixelRatio = window.devicePixelRatio || 1;
-
+      //add the tree imahge
       image.css({
         position: 'absolute',
         left: mouseX+dx+'px',
@@ -313,13 +363,7 @@ $(document).ready(function() {
 
       $("body").append(image);
 
-
-      const element = $(document.elementFromPoint(mouseX, mouseY));
-      console.log(element.closest("td").index(), element.closest("tr").index());
-      const offsetX = element.closest("td").index();
-      const offsetY = element.closest("tr").index();
-
-
+      //add the associated plants
 
       for (var x = 0; x < 5; x++) {
         for (var y = 0; y < 5; y++) {
