@@ -51,7 +51,9 @@ function createTable(){
       image.on("click", function() {
         var currentIndex = imageList.indexOf($(this).attr("src"));
         var nextIndex = currentIndex % (imageList.length-1) + 1;
+        $(this).hide();
         $(this).attr("src", imageList[nextIndex]);
+        $(this).fadeIn();
       });
 
       // Click event to return to soil
@@ -218,7 +220,9 @@ function growNextGeneration(table, nextGeneration, chaos, isRandom, isGreedy){
             var cellImage = table.find("tr").eq(x).find("td").eq(y).find("img");
 
             if(cellImage.attr("src") == imageList[0]){
+              cellImage.hide();
               cellImage.attr("src", value.value[index]);
+              cellImage.fadeIn();
             }
             index++;
         }
@@ -322,7 +326,9 @@ $(document).ready(function() {
           var cellImage = table.find("tr").eq(y+offsetY-2).find("td").eq(x+offsetX-2).find("img");
 
             if(cellImage.attr("src") == imageList[0] && y+offsetY-2 >= 0 && x+offsetX-2 >= 0){
+              cellImage.hide();
               cellImage.attr("src", imageList[data[x][y]]);
+              cellImage.fadeIn();
             }
         }
       }
